@@ -43,8 +43,8 @@ and provided a centralized point for cross-cutting concerns like security and ro
 ## Observability with Grafana Stack
 I integrated the complete Grafana stack to implement comprehensive observability across all services:
 
-- Grafana: visualization dashboard for all observability data
-- Prometheus: time-series database for collecting and querying metrics
-- Loki: log aggregation system (similar to Elasticsearch)
-- Tempo: distributed tracing backend
+- **Grafana**: visualization dashboard for all observability data
+- **Prometheus**: time-series database for collecting and querying metrics
+- **Loki**: log aggregation system (similar to Elasticsearch)
+- **Tempo**: distributed tracing backend
 
