@@ -1,5 +1,6 @@
 package dev.swang.ecommerce.productservice.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,9 +12,13 @@ public class Product {
   private String id;
   private String name;
   private String description;
-  private double price;
+  private BigDecimal price;
 
   public Product() {
+  }
+
+  public static ProductBuilder builder() {
+    return new ProductBuilder();
   }
 
   public String getId() {
@@ -40,11 +45,11 @@ public class Product {
     this.description = description;
   }
 
-  public double getPrice() {
+  public BigDecimal getPrice() {
     return price;
   }
 
-  public void setPrice(double price) {
+  public void setPrice(BigDecimal price) {
     this.price = price;
   }
 
@@ -54,7 +59,7 @@ public class Product {
       return false;
     }
     Product product = (Product) o;
-    return Double.compare(price, product.price) == 0 && Objects.equals(id,
+    return price.compareTo(product.price) == 0 && Objects.equals(id,
         product.id) && Objects.equals(name, product.name) && Objects.equals(
         description, product.description);
   }
@@ -66,7 +71,7 @@ public class Product {
 
   public static class ProductBuilder {
 
-    private Product product;
+    private final Product product;
 
     public ProductBuilder() {
       product = new Product();
@@ -87,7 +92,7 @@ public class Product {
       return this;
     }
 
-    public ProductBuilder price(double price) {
+    public ProductBuilder price(BigDecimal price) {
       product.setPrice(price);
       return this;
     }
