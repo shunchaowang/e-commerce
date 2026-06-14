@@ -82,6 +82,33 @@ class ProductServiceApplicationTests {
   @Test
   void shouldGetAllProducts() {
 
+    int size = 10;
+
+    for (int i = 0; i < size; i++) {
+      String requestBody = """
+          {
+            "name": "test product %s",
+            "description": "test description %s",
+            "price": %d
+          }
+          """.formatted(i, i, i + 100);
+
+      RestAssured.given()
+          .contentType(ContentType.JSON)
+          .body(requestBody)
+          .when()
+          .post("/api/v1/products")
+          .then()
+          .statusCode(201);
+
+    }
+
+    RestAssured.when()
+        .get("/api/v1/products")
+        .then()
+        .statusCode(200)
+        .body("size()", Matchers.is(size));
+
   }
 
 }
