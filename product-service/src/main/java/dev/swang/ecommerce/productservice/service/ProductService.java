@@ -29,20 +29,22 @@ public class ProductService {
     productRepository.save(product);
     logger.info("Product {} is created.", product.getId());
     return new ProductResponse(product.getId(), product.getName(), product.getDescription(),
-        product.getPrice());
+        product.getPrice(), product.getCreatedAt(), product.getUpdatedAt());
   }
 
   public List<ProductResponse> getAllProducts() {
     return productRepository.findAll().stream()
         .map(product -> new ProductResponse(product.getId(), product.getName(),
-            product.getDescription(), product.getPrice()))
+            product.getDescription(), product.getPrice(), product.getCreatedAt(),
+            product.getUpdatedAt()))
         .toList();
   }
 
   public ProductResponse getProductById(String id) {
     return productRepository.findById(id)
         .map(product -> new ProductResponse(product.getId(), product.getName(),
-            product.getDescription(), product.getPrice()))
+            product.getDescription(), product.getPrice(), product.getCreatedAt(),
+            product.getUpdatedAt()))
         .orElseThrow(() -> new RuntimeException("Product not found"));
   }
 }

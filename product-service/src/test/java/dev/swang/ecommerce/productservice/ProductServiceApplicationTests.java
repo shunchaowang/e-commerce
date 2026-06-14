@@ -1,10 +1,12 @@
 package dev.swang.ecommerce.productservice;
 
+import dev.swang.ecommerce.productservice.Repository.ProductRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
@@ -18,8 +20,12 @@ class ProductServiceApplicationTests {
   @LocalServerPort
   private int port;
 
+  @Autowired
+  ProductRepository productRepository;
+
   @BeforeEach
   void setup() {
+    productRepository.deleteAll();
     RestAssured.baseURI = "http://localhost";
     RestAssured.port = port;
   }
@@ -43,6 +49,8 @@ class ProductServiceApplicationTests {
         .then()
         .statusCode(201)
         .body("id", Matchers.notNullValue())
+        .body("createdAt", Matchers.notNullValue())
+        .body("updatedAt", Matchers.notNullValue())
         .body("name", Matchers.equalTo("test product"))
         .body("description", Matchers.equalTo("test description"))
         .body("price", Matchers.equalTo(100));
@@ -74,6 +82,8 @@ class ProductServiceApplicationTests {
         .then()
         .statusCode(200)
         .body("id", Matchers.equalTo(id))
+        .body("createdAt", Matchers.notNullValue())
+        .body("updatedAt", Matchers.notNullValue())
         .body("name", Matchers.equalTo("test product"))
         .body("description", Matchers.equalTo("test description"))
         .body("price", Matchers.equalTo(100));

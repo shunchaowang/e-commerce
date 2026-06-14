@@ -1,8 +1,11 @@
 package dev.swang.ecommerce.productservice.model;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Objects;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "products")
@@ -13,6 +16,11 @@ public class Product {
   private String name;
   private String description;
   private BigDecimal price;
+
+  @CreatedDate
+  private Instant createdAt;
+  @LastModifiedDate
+  private Instant updatedAt;
 
   public Product() {
   }
@@ -47,6 +55,14 @@ public class Product {
 
   public void setPrice(BigDecimal price) {
     this.price = price;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
   }
 
   @Override
