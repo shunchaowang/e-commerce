@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${postgres_user:-root}
+      POSTGRES_PASSWORD: ${postgres_password:-password}
+      POSTGRES_DB: inventory
+    volumes:
+      - ./data:/data/postgres
