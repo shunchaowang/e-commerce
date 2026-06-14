@@ -21,7 +21,7 @@ public class ProductService {
   }
 
   public ProductResponse createProduct(ProductRequest productRequest) {
-    Product product = Product.builder()
+    Product product = new Product.Builder()
         .name(productRequest.name())
         .description(productRequest.description())
         .price(productRequest.price())

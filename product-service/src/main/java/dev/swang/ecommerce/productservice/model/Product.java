@@ -17,10 +17,6 @@ public class Product {
   public Product() {
   }
 
-  public static ProductBuilder builder() {
-    return new ProductBuilder();
-  }
-
   public String getId() {
     return id;
   }
@@ -69,30 +65,25 @@ public class Product {
     return Objects.hash(id, name, description, price);
   }
 
-  public static class ProductBuilder {
+  public static class Builder {
 
     private final Product product;
 
-    public ProductBuilder() {
+    public Builder() {
       product = new Product();
     }
 
-    public ProductBuilder id(String id) {
-      product.setId(id);
-      return this;
-    }
-
-    public ProductBuilder name(String name) {
+    public Builder name(String name) {
       product.setName(name);
       return this;
     }
 
-    public ProductBuilder description(String description) {
+    public Builder description(String description) {
       product.setDescription(description);
       return this;
     }
 
-    public ProductBuilder price(BigDecimal price) {
+    public Builder price(BigDecimal price) {
       product.setPrice(price);
       return this;
     }

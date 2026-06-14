@@ -50,7 +50,33 @@ class ProductServiceApplicationTests {
 
   @Test
   void shouldGetProductById() {
+    String requestBody = """
+        {
+            "name": "test product",
+            "description": "test description",
+            "price": 100
+        }
+        """;
 
+    String id = RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(requestBody)
+        .when()
+        .post("/api/v1/products")
+        .then()
+        .statusCode(201)
+        .extract()
+        .jsonPath()
+        .getString("id");
+
+    RestAssured.when()
+        .get("/api/v1/products/{id}", id)
+        .then()
+        .statusCode(200)
+        .body("id", Matchers.equalTo(id))
+        .body("name", Matchers.equalTo("test product"))
+        .body("description", Matchers.equalTo("test description"))
+        .body("price", Matchers.equalTo(100));
   }
 
   @Test
