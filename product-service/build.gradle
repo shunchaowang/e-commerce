@@ -17,6 +17,10 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    mockitoAgent
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
@@ -31,8 +35,21 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-mongodb'
     testImplementation 'io.rest-assured:rest-assured:6.0.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // mockito agent
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    mockitoAgent('org.mockito:mockito-core:5.14.2') {
+        transitive = false
+    }
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks {
+    test {
+        jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+    }
+}
+
