@@ -31,6 +31,7 @@ class InventoryServiceTest {
         .build();
 
     when(inventoryRepository.findBySkuCode("SKU123")).thenReturn(Optional.of(inventory));
+    when(inventoryRepository.save(inventory)).thenReturn(inventory);
 
     Inventory result = inventoryService.outStock("SKU123", 6);
 
