@@ -1,7 +1,5 @@
-package dev.swang.ecommerce.productservice.controller;
+package dev.swang.ecommerce.productservice.web;
 
-import dev.swang.ecommerce.productservice.dto.ProductRequest;
-import dev.swang.ecommerce.productservice.dto.ProductResponse;
 import dev.swang.ecommerce.productservice.service.ProductService;
 import java.util.List;
 import org.springframework.http.HttpStatus;

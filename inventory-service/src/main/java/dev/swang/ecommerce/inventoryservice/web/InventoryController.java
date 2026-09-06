@@ -1,4 +1,4 @@
-package dev.swang.ecommerce.inventoryservice.controller;
+package dev.swang.ecommerce.inventoryservice.web;
 
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.service.InventoryService;
@@ -44,10 +44,6 @@ public class InventoryController {
     Inventory inventory = inventoryService.outStock(inventoryDTO.skuCode(),
         inventoryDTO.quantity());
     return new InventoryDTO(inventory.getSkuCode(), inventory.getQuantity());
-  }
-
-  public record InventoryDTO(String skuCode, Integer quantity) {
-
   }
 
 }

@@ -1,8 +1,8 @@
 package dev.swang.ecommerce.productservice.service;
 
 import dev.swang.ecommerce.productservice.Repository.ProductRepository;
-import dev.swang.ecommerce.productservice.dto.ProductRequest;
-import dev.swang.ecommerce.productservice.dto.ProductResponse;
+import dev.swang.ecommerce.productservice.web.ProductRequest;
+import dev.swang.ecommerce.productservice.web.ProductResponse;
 import dev.swang.ecommerce.productservice.model.Product;
 import java.util.List;
 import org.slf4j.Logger;

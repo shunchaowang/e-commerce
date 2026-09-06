@@ -1,4 +1,4 @@
-package dev.swang.ecommerce.productservice.dto;
+package dev.swang.ecommerce.productservice.web;
 
 import java.math.BigDecimal;
 
