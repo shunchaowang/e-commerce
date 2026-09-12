@@ -29,8 +29,7 @@ public class Inventory {
   @LastModifiedDate
   private Instant updatedAt;
 
-  public Inventory() {
-  }
+  private Inventory() {}
 
   public void setSkuCode(String skuCode) {
     this.skuCode = skuCode;
@@ -66,8 +65,8 @@ public class Inventory {
       return false;
     }
     Inventory inventory = (Inventory) o;
-    return Objects.equals(id, inventory.id) && Objects.equals(skuCode,
-        inventory.skuCode) && Objects.equals(quantity, inventory.quantity);
+    return Objects.equals(id, inventory.id) && Objects.equals(skuCode, inventory.skuCode)
+        && Objects.equals(quantity, inventory.quantity);
   }
 
   @Override

@@ -28,7 +28,7 @@ public class InventoryService {
   @Transactional
   public Inventory enStock(String skuCode, Integer quantity) {
 
-    Inventory inventory = getInventoryBySkuCode(skuCode).orElse(new Inventory());
+    Inventory inventory = getInventoryBySkuCode(skuCode).orElse(new Inventory.Builder().build());
     inventory.setQuantity(inventory.getQuantity() + quantity);
     return inventoryRepository.save(inventory);
   }
