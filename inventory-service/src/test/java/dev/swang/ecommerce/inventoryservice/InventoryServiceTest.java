@@ -1,13 +1,13 @@
-package dev.swang.ecommerce.inventoryservice.service;
+package dev.swang.ecommerce.inventoryservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import dev.swang.ecommerce.inventoryservice.model.Inventory;
-import dev.swang.ecommerce.inventoryservice.repository.InventoryRepository;
+import dev.swang.ecommerce.inventoryservice.Inventory;
+import dev.swang.ecommerce.inventoryservice.InventoryRepository;
+import dev.swang.ecommerce.inventoryservice.InventoryService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,7 +1,5 @@
-package dev.swang.ecommerce.inventoryservice.web;
+package dev.swang.ecommerce.inventoryservice;
 
-import dev.swang.ecommerce.inventoryservice.model.Inventory;
-import dev.swang.ecommerce.inventoryservice.service.InventoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,7 +26,7 @@ public class InventoryController {
 
   @GetMapping
   public boolean isInStock(@RequestParam String skuCode, @RequestParam Integer quantity) {
-    return inventoryService.InStock(skuCode, quantity);
+    return inventoryService.inStock(skuCode, quantity);
   }
 
   @PostMapping

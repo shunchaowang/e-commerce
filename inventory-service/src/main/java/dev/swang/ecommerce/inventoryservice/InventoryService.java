@@ -1,10 +1,10 @@
-package dev.swang.ecommerce.inventoryservice.service;
+package dev.swang.ecommerce.inventoryservice;
 
-import dev.swang.ecommerce.inventoryservice.model.Inventory;
-import dev.swang.ecommerce.inventoryservice.repository.InventoryRepository;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 
 @Service
 public class InventoryService {
@@ -16,7 +16,7 @@ public class InventoryService {
   }
 
   @Transactional(readOnly = true)
-  public boolean InStock(String skuCode, Integer quantity) {
+  public boolean inStock(String skuCode, Integer quantity) {
     return inventoryRepository.existsBySkuCodeAndQuantityIsGreaterThanEqual(skuCode, quantity);
   }
 
@@ -28,17 +28,18 @@ public class InventoryService {
   @Transactional
   public Inventory enStock(String skuCode, Integer quantity) {
 
-    Inventory inventory = getInventoryBySkuCode(skuCode).orElse(new Inventory.Builder().build());
+    Inventory inventory =
+        inventoryRepository.findBySkuCode(skuCode).orElse(new Inventory.Builder().build());
     inventory.setQuantity(inventory.getQuantity() + quantity);
     return inventoryRepository.save(inventory);
   }
 
   @Transactional
   public Inventory outStock(String skuCode, Integer quantity) {
-    Inventory inventory = getInventoryBySkuCode(skuCode).orElseThrow(
-        () -> new RuntimeException("Inventory not found"));
+    Inventory inventory = inventoryRepository.findBySkuCode(skuCode)
+        .orElseThrow(() -> new BadRequestException("Inventory not found"));
     if (inventory.getQuantity() < quantity) {
-      throw new RuntimeException("Inventory not enough");
+      throw new BadRequestException("Inventory not enough");
     }
     inventory.setQuantity(inventory.getQuantity() - quantity);
     return inventoryRepository.save(inventory);

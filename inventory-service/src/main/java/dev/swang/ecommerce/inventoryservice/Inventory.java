@@ -1,4 +1,4 @@
-package dev.swang.ecommerce.inventoryservice.model;
+package dev.swang.ecommerce.inventoryservice;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
