@@ -32,14 +32,14 @@ public class InventoryController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public InventoryDTO enStock(@RequestBody InventoryDTO inventoryDTO) {
-    Inventory inventory = inventoryService.enStock(inventoryDTO.skuCode(), inventoryDTO.quantity());
+    InventoryEntity inventory = inventoryService.enStock(inventoryDTO.skuCode(), inventoryDTO.quantity());
     return new InventoryDTO(inventory.getSkuCode(), inventory.getQuantity());
   }
 
   @PutMapping
   @ResponseStatus(HttpStatus.OK)
   public InventoryDTO outStock(@RequestBody InventoryDTO inventoryDTO) {
-    Inventory inventory = inventoryService.outStock(inventoryDTO.skuCode(),
+    InventoryEntity inventory = inventoryService.outStock(inventoryDTO.skuCode(),
         inventoryDTO.quantity());
     return new InventoryDTO(inventory.getSkuCode(), inventory.getQuantity());
   }

@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import dev.swang.ecommerce.inventoryservice.Inventory;
+import dev.swang.ecommerce.inventoryservice.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.InventoryController;
 import dev.swang.ecommerce.inventoryservice.InventoryService;
 import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
@@ -55,7 +55,7 @@ class InventoryControllerTest {
         String skuCode = "SKU123";
         int quantity = 10;
 
-        Inventory inventory = new Inventory.Builder().skuCode(skuCode).quantity(quantity).build();
+        InventoryEntity inventory = new InventoryEntity.Builder().skuCode(skuCode).quantity(quantity).build();
 
         when(inventoryService.enStock(skuCode, quantity)).thenReturn(inventory);
 
@@ -70,7 +70,7 @@ class InventoryControllerTest {
         String skuCode = "SKU123";
         int quantity = 10;
 
-        Inventory inventory = new Inventory.Builder().skuCode(skuCode).quantity(quantity).build();
+        InventoryEntity inventory = new InventoryEntity.Builder().skuCode(skuCode).quantity(quantity).build();
 
         when(inventoryService.outStock(skuCode, quantity)).thenReturn(inventory);
 

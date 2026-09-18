@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import dev.swang.ecommerce.inventoryservice.Inventory;
+import dev.swang.ecommerce.inventoryservice.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.InventoryRepository;
 import dev.swang.ecommerce.inventoryservice.InventoryService;
 import java.util.Optional;
@@ -29,7 +29,7 @@ class InventoryServiceTest {
     String skuCode = "SKU123";
     int quantity = 10;
     int outStockQuantity = 6;
-    Inventory inventory = new Inventory.Builder()
+    InventoryEntity inventory = new InventoryEntity.Builder()
         .skuCode(skuCode)
         .quantity(quantity)
         .build();
@@ -38,7 +38,7 @@ class InventoryServiceTest {
     // remember to mock the save method
     when(inventoryRepository.save(inventory)).thenReturn(inventory);
 
-    Inventory result = inventoryService.outStock(skuCode, outStockQuantity);
+    InventoryEntity result = inventoryService.outStock(skuCode, outStockQuantity);
 
     assertThat(result).isNotNull();
     assertThat(result.getQuantity()).isEqualTo(quantity - outStockQuantity);
@@ -60,7 +60,7 @@ class InventoryServiceTest {
     String skuCode = "SKU123";
     int quantity = 4;
     int outStockQuantity = 6;
-    Inventory inventory = new Inventory.Builder()
+    InventoryEntity inventory = new InventoryEntity.Builder()
         .skuCode(skuCode)
         .quantity(quantity)
         .build();
