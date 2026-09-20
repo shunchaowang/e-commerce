@@ -7,10 +7,10 @@ package dev.swang.ecommerce.inventoryservice.model;
  * to call that a setQuantity, but we would like to have something with a meaningful name, like a
  * changeQuantity.
  */
-public final class Inventory {
+public class Inventory {
 
-    private Long id;
-    private String skuCode;
+    private final Long id;
+    private final String skuCode;
     private Integer quantity;
 
     private Inventory(Builder builder) {
@@ -31,11 +31,11 @@ public final class Inventory {
         return quantity;
     }
 
-    public void changeQuantity(Integer newQuantity) {
-        if (newQuantity < 0) {
+    public void changeQuantity(Integer quantity) {
+        if (quantity < 0) {
             throw new IllegalArgumentException("Quantity cannot be negative");
         }
-        this.quantity = newQuantity;
+        this.quantity = quantity;
     }
 
     public static class Builder {
