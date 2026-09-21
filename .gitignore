@@ -4,6 +4,7 @@
 .DS_Store
 data
 .vscode
+*.code-workspace
 
 # Ignore Gradle build output directory
 build
