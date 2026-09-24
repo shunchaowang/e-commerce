@@ -28,13 +28,45 @@ public class InventoryController {
   }
 
   @GetMapping("/{skuCode}")
-  @ResponseStatus (HttpStatus.OK)
+  @ResponseStatus(HttpStatus.OK)
   public Integer getStock(@PathVariable String skuCode) {
     return inventoryService.getStock(skuCode);
   }
 
-  @PostMapping
+  /**
+   * Adds stock to the inventory for the given SKU code. This is to show how to path variable,
+   * request param and request body in the same method. path variable is used to identify the
+   * resource, request param is used to pass additional information like filter, and request body is
+   * used to pass the data.
+   * 
+   * @param skuCode which sku to want to add ventory
+   * @param valid should validate if the sku exists or not. if valid is true, we will check if the
+   *        sku exists in the database, if it does not exist, we will throw an exception; if valid
+   *        is false, we will not check if the sku exists in the database, we will just add the
+   *        stock to the inventory.
+   * @param request the request body containing the quantity to add to the inventory, to make this
+   *        generic, we can use the same request body for both enStock and outStock methods.
+   * @return
+   */
+  @PostMapping("/{skuCode}")
   @ResponseStatus(HttpStatus.CREATED)
+  public CreateInventoryResponse enStock(@PathVariable String skuCode, @RequestParam boolean valid,
+      @RequestBody CreateInventoryRequest request) {
+    if (valid) {
+      // check if the sku exists in the database, if it does not exist, we will throw an exception
+      if (!inventoryService.ifExists(skuCode)) {
+        throw new IllegalArgumentException("Inventory does not exist for skuCode: " + skuCode);
+      } else {
+        Inventory inventory = inventoryService.enStock(skuCode, request.quantity());
+        return new CreateInventoryResponse(inventory.getSkuCode(), inventory.getQuantity());
+      }
+    } else {
+      inventoryService.enStock(skuCode, request.quantity());
+      return new CreateInventoryResponse(skuCode, request.quantity());
+    }
+  }
+
+
   public CreateInventoryResponse enStock(@RequestBody CreateInventoryRequest request) {
     Inventory inventory = inventoryService.enStock(request.skuCode(), request.quantity());
     return new CreateInventoryResponse(inventory.getSkuCode(), inventory.getQuantity());

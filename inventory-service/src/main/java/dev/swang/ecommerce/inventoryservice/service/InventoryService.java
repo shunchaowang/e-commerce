@@ -10,9 +10,15 @@ import dev.swang.ecommerce.inventoryservice.persistence.InventoryRepository;
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
+    private static final String inventoryNotFoundStr = "Inventory not found for skuCode: ";
 
     public InventoryService(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
+    }
+
+    @Transactional
+    public boolean ifExists(String skuCode) {
+        return inventoryRepository.findBySkuCode(skuCode).isPresent();
     }
 
     // we will check if the skuCode exists in the database, if it does, we will update the quantity
@@ -34,15 +40,16 @@ public class InventoryService {
     @Transactional(readOnly = true)
     public Inventory getInventoryBySkuCode(String skuCode) {
         return inventoryRepository.findBySkuCode(skuCode).map(InventoryEntity::toInventory)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Inventory not found for skuCode: " + skuCode));
+                .orElseThrow(() -> {
+                    return new IllegalArgumentException(inventoryNotFoundStr + skuCode);
+                });
     }
 
 
     @Transactional
     public Inventory outStock(String skuCode, int quantity) {
-        InventoryEntity inventoryEntity = inventoryRepository.findBySkuCode(skuCode).orElseThrow(
-                () -> new IllegalArgumentException("Inventory not found for skuCode: " + skuCode));
+        InventoryEntity inventoryEntity = inventoryRepository.findBySkuCode(skuCode)
+                .orElseThrow(() -> new IllegalArgumentException(inventoryNotFoundStr + skuCode));
         Inventory inventory = inventoryEntity.toInventory();
         if (inventory.getQuantity() < quantity) {
             throw new IllegalArgumentException("Not enough inventory for skuCode: " + skuCode);
@@ -55,7 +62,6 @@ public class InventoryService {
     @Transactional(readOnly = true)
     public Integer getStock(String skuCode) {
         return inventoryRepository.findBySkuCode(skuCode).map(InventoryEntity::getQuantity)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Inventory not found for skuCode: " + skuCode));
+                .orElseThrow(() -> new IllegalArgumentException(inventoryNotFoundStr + skuCode));
     }
 }
