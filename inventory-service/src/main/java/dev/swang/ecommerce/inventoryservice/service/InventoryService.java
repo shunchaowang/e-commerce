@@ -2,6 +2,7 @@ package dev.swang.ecommerce.inventoryservice.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryRepository;
@@ -37,22 +38,13 @@ public class InventoryService {
         return inventory;
     }
 
-    @Transactional(readOnly = true)
-    public Inventory getInventoryBySkuCode(String skuCode) {
-        return inventoryRepository.findBySkuCode(skuCode).map(InventoryEntity::toInventory)
-                .orElseThrow(() -> {
-                    return new IllegalArgumentException(inventoryNotFoundStr + skuCode);
-                });
-    }
-
-
     @Transactional
     public Inventory outStock(String skuCode, int quantity) {
         InventoryEntity inventoryEntity = inventoryRepository.findBySkuCode(skuCode)
-                .orElseThrow(() -> new IllegalArgumentException(inventoryNotFoundStr + skuCode));
+                .orElseThrow(() -> new BadRequestException(inventoryNotFoundStr + skuCode));
         Inventory inventory = inventoryEntity.toInventory();
         if (inventory.getQuantity() < quantity) {
-            throw new IllegalArgumentException("Not enough inventory for skuCode: " + skuCode);
+            throw new BadRequestException("Not enough inventory for skuCode: " + skuCode);
         }
         inventory.changeQuantity(inventory.getQuantity() - quantity);
         inventoryEntity.setQuantity(inventory.getQuantity());
@@ -62,6 +54,6 @@ public class InventoryService {
     @Transactional(readOnly = true)
     public Integer getStock(String skuCode) {
         return inventoryRepository.findBySkuCode(skuCode).map(InventoryEntity::getQuantity)
-                .orElseThrow(() -> new IllegalArgumentException(inventoryNotFoundStr + skuCode));
+                .orElseThrow(() -> new BadRequestException(inventoryNotFoundStr + skuCode));
     }
 }

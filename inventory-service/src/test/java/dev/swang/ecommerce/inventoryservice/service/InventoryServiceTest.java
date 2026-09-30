@@ -24,6 +24,53 @@ class InventoryServiceTest {
   @InjectMocks
   private InventoryService inventoryService;
 
+
+  @Test
+  void ifExists_WhenInventoryExists_ThenReturnTrue() {
+    String skuCode = "SKU123";
+    InventoryEntity inventoryEntity = new InventoryEntity(skuCode, 10);
+    when(inventoryRepository.findBySkuCode(skuCode)).thenReturn(Optional.of(inventoryEntity));
+
+    boolean result = inventoryService.ifExists(skuCode);
+
+    assertThat(result).isTrue();
+  }
+
+  @Test
+  void ifExists_WhenInventoryNotFound_ThenReturnFalse() {
+    String skuCode = "SKU123";
+    when(inventoryRepository.findBySkuCode(skuCode)).thenReturn(Optional.empty());
+
+    boolean result = inventoryService.ifExists(skuCode);
+
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void enStock_WhenInventoryExists_ThenReturnInventory() {
+    String skuCode = "SKU123";
+    int quantity = 10;
+    InventoryEntity inventoryEntity = new InventoryEntity(skuCode, quantity);
+    when(inventoryRepository.findBySkuCode(skuCode)).thenReturn(Optional.of(inventoryEntity));
+
+    Inventory result = inventoryService.enStock(skuCode, quantity);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getQuantity()).isEqualTo(quantity + quantity);
+  }
+
+  @Test
+  void enStock_WhenInventoryNotExists_ThenReturnInventory() {
+    String skuCode = "SKU123";
+    int quantity = 10;
+    when(inventoryRepository.findBySkuCode(skuCode)).thenReturn(Optional.empty());
+
+    Inventory result = inventoryService.enStock(skuCode, quantity);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getQuantity()).isEqualTo(quantity);
+  }
+
   @Test
   void outStock_WhenInventoryExists_ThenReturnInventory() {
     String skuCode = "SKU123";
@@ -37,8 +84,6 @@ class InventoryServiceTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getQuantity()).isEqualTo(quantity - outStockQuantity);
-    // verify(inventoryRepository, times(1)).save(inventoryEntity);
-
   }
 
   @Test
@@ -46,8 +91,8 @@ class InventoryServiceTest {
     String skuCode = "SKU123";
     int outStockQuantity = 6;
     when(inventoryRepository.findBySkuCode(skuCode)).thenReturn(Optional.empty());
-    assertThrows(RuntimeException.class,
-        () -> inventoryService.outStock(skuCode, outStockQuantity), "Inventory not found for skuCode: " + skuCode);
+    assertThrows(RuntimeException.class, () -> inventoryService.outStock(skuCode, outStockQuantity),
+        "Inventory not found for skuCode: " + skuCode);
   }
 
   @Test
@@ -57,8 +102,8 @@ class InventoryServiceTest {
     int outStockQuantity = 6;
     InventoryEntity inventoryEntity = new InventoryEntity(skuCode, quantity);
     when(inventoryRepository.findBySkuCode(skuCode)).thenReturn(Optional.of(inventoryEntity));
-    assertThrows(RuntimeException.class,
-        () -> inventoryService.outStock(skuCode, outStockQuantity), "Not enough inventory for skuCode: " + skuCode);
+    assertThrows(RuntimeException.class, () -> inventoryService.outStock(skuCode, outStockQuantity),
+        "Not enough inventory for skuCode: " + skuCode);
   }
 
 }

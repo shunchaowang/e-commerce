@@ -23,6 +23,10 @@ The project implements several crucial microservice architectural patterns:
                                                 |                           |
                                                 +---------------------------+
                                                 
+## Build
+Under the root path, run `./gradlew build` to build the whole project.
+## Test
+Before test make sure the podman has started by running `podman machine start`, then run `./gradlew test`.
 ## Core Services
 ### Product Service
 ### Order Service
