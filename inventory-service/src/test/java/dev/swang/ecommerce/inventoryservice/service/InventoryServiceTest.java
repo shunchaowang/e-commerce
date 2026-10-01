@@ -2,18 +2,20 @@ package dev.swang.ecommerce.inventoryservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryRepository;
+import dev.swang.ecommerce.utils.InventoryMapper;
 
 @ExtendWith(MockitoExtension.class)
 class InventoryServiceTest {
@@ -21,9 +23,14 @@ class InventoryServiceTest {
   @Mock
   private InventoryRepository inventoryRepository;
 
-  @InjectMocks
+  private InventoryMapper inventoryMapper;
   private InventoryService inventoryService;
 
+  @BeforeEach
+  void setUp() {
+    inventoryMapper = new InventoryMapper();
+    inventoryService = new InventoryService(inventoryRepository, inventoryMapper);
+  }
 
   @Test
   void ifExists_WhenInventoryExists_ThenReturnTrue() {

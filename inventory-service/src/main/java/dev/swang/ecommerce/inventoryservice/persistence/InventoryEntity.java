@@ -28,7 +28,8 @@ public class InventoryEntity {
     @Version
     private Long version;
 
-    protected InventoryEntity() {}
+    protected InventoryEntity() {
+    }
 
     public InventoryEntity(String skuCode, Integer quantity) {
         this.skuCode = skuCode;
@@ -69,11 +70,6 @@ public class InventoryEntity {
 
     public Long getVersion() {
         return version;
-    }
-
-    public Inventory toInventory() {
-        return new Inventory.Builder().id(this.id).skuCode(this.skuCode).quantity(this.quantity)
-                .build();
     }
 
 }

@@ -6,15 +6,18 @@ import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryRepository;
+import dev.swang.ecommerce.utils.InventoryMapper;
 
 @Service
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
+    private final InventoryMapper inventoryMapper;
     private static final String inventoryNotFoundStr = "Inventory not found for skuCode: ";
 
-    public InventoryService(InventoryRepository inventoryRepository) {
+    public InventoryService(InventoryRepository inventoryRepository, InventoryMapper inventoryMapper) {
         this.inventoryRepository = inventoryRepository;
+        this.inventoryMapper = inventoryMapper;
     }
 
     @Transactional
@@ -22,9 +25,11 @@ public class InventoryService {
         return inventoryRepository.findBySkuCode(skuCode).isPresent();
     }
 
-    // we will check if the skuCode exists in the database, if it does, we will update the quantity
+    // we will check if the skuCode exists in the database, if it does, we will
+    // update the quantity
     // by adding the passed in quantity,
-    // if it does not exist, we will create a new inventory with the passed in skuCode and quantity
+    // if it does not exist, we will create a new inventory with the passed in
+    // skuCode and quantity
     @Transactional
     public Inventory enStock(String skuCode, int quantity) {
 
@@ -32,7 +37,7 @@ public class InventoryService {
                 .orElseGet(() -> new InventoryEntity(skuCode, 0));
         // now inventoryEntity either an existing inventory or a new one with quantity 0
         // conver it to the Inventory
-        Inventory inventory = inventoryEntity.toInventory();
+        Inventory inventory = inventoryMapper.entityToInventory(inventoryEntity);
         inventory.changeQuantity(inventory.getQuantity() + quantity);
         inventoryEntity.setQuantity(inventory.getQuantity());
         return inventory;
@@ -42,7 +47,7 @@ public class InventoryService {
     public Inventory outStock(String skuCode, int quantity) {
         InventoryEntity inventoryEntity = inventoryRepository.findBySkuCode(skuCode)
                 .orElseThrow(() -> new BadRequestException(inventoryNotFoundStr + skuCode));
-        Inventory inventory = inventoryEntity.toInventory();
+        Inventory inventory = inventoryMapper.entityToInventory(inventoryEntity);
         if (inventory.getQuantity() < quantity) {
             throw new BadRequestException("Not enough inventory for skuCode: " + skuCode);
         }
