@@ -20,7 +20,7 @@ import dev.swang.ecommerce.inventoryservice.service.InventoryService;
 import dev.swang.ecommerce.utils.InventoryMapper;
 
 @RestController
-@RequestMapping("/api/v1/inventory")
+@RequestMapping("/api/v1/inventory/{skuCode}")
 public class InventoryController {
 
   // visibility-scope-mutability
@@ -33,7 +33,7 @@ public class InventoryController {
     this.inventoryMapper = inventoryMapper;
   }
 
-  @GetMapping("/{skuCode}")
+  @GetMapping
   public ResponseEntity<InventoryResponse> getStock(@PathVariable String skuCode) {
     try {
       Integer quantity = inventoryService.getStock(skuCode);
@@ -71,7 +71,7 @@ public class InventoryController {
    *                outStock methods.
    * @return
    */
-  @PostMapping("/{skuCode}")
+  @PostMapping
   public ResponseEntity<InventoryResponse> enStock(@PathVariable String skuCode,
       @RequestParam boolean valid, @RequestBody CommandInventoryRequest request) {
     if (valid) {
@@ -94,7 +94,7 @@ public class InventoryController {
     }
   }
 
-  @PutMapping("/{skuCode}")
+  @PutMapping
   public ResponseEntity<InventoryResponse> outStock(@PathVariable String skuCode,
       @RequestBody CommandInventoryRequest request) {
     // Assuming there's a method in inventoryService to handle outStock with just
