@@ -1,2 +1,2 @@
 rootProject.name = 'e-commerce'
-include('api-gateway', 'product-service', 'inventory-service', 'notification-service')
+include('common-model', 'api-gateway', 'product-service', 'inventory-service', 'notification-service')
