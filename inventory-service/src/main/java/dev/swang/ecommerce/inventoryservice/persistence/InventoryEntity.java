@@ -1,55 +1,44 @@
 package dev.swang.ecommerce.inventoryservice.persistence;
 
-import java.time.Instant;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import dev.swang.ecommerce.inventoryservice.model.Inventory;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import java.util.Objects;
+import java.util.UUID;
 
+import dev.swang.ecommerce.commonmodel.BaseJpaEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+/**
+ * Extends BaseJpaEntity with the UUID, version, createdAt and updatedAt
+ * InventoryEntity
+ */
 @Entity
 @Table(name = "inventory")
-public class InventoryEntity {
+public class InventoryEntity extends BaseJpaEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String skuCode;
+    private Integer location;
+    private String sku;
     private Integer quantity;
-
-    @CreatedDate
-    private Instant createdAt;
-    @LastModifiedDate
-    private Instant updatedAt;
-    @Version
-    private Long version;
+    private String type;
+    private Boolean active;
 
     protected InventoryEntity() {
     }
 
-    public InventoryEntity(String skuCode, Integer quantity) {
-        this.skuCode = skuCode;
-        this.quantity = quantity;
+    private InventoryEntity(Builder builder) {
+        super(builder.id);
+        this.sku = builder.sku;
+        this.location = builder.location;
+        this.quantity = builder.quantity;
+        this.type = builder.type;
+        this.active = builder.active;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getSku() {
+        return sku;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getSkuCode() {
-        return skuCode;
-    }
-
-    public void setSkuCode(String skuCode) {
-        this.skuCode = skuCode;
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 
     public Integer getQuantity() {
@@ -60,16 +49,72 @@ public class InventoryEntity {
         this.quantity = quantity;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
+    public Integer getLocation() {
+        return location;
     }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
+    public String getType() {
+        return type;
     }
 
-    public Long getVersion() {
-        return version;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setLocation(Integer location) {
+        this.location = location;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public static class Builder {
+
+        private UUID id;
+        private String sku;
+        private Integer location;
+        private Integer quantity;
+        private String type;
+        private Boolean active;
+
+        public Builder(UUID id) {
+            this.id = Objects.requireNonNull(id);
+        }
+
+        public Builder sku(String sku) {
+            this.sku = sku;
+            return this;
+        }
+
+        public Builder location(Integer location) {
+            this.location = location;
+            return this;
+        }
+
+        public Builder quantity(Integer quantity) {
+            this.quantity = quantity;
+            return null;
+        }
+
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder active(Boolean active) {
+            this.active = active;
+            return this;
+        }
+
+        public InventoryEntity build() {
+            return new InventoryEntity(this);
+        }
+
     }
 
 }

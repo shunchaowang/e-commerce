@@ -10,18 +10,21 @@ import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 public class InventoryMapper {
 
   public Inventory entityToInventory(InventoryEntity entity) {
-    return new Inventory.Builder().id(entity.getId()).skuCode(entity.getSkuCode()).quantity(entity.getQuantity())
+    return new Inventory.Builder().id(entity.getId()).sku(entity.getSku()).location(entity.getLocation())
+        .quantity(entity.getQuantity())
+        .active(entity.getActive())
         .build();
   }
 
   public InventoryEntity inventoryToEntity(Inventory inventory) {
-    InventoryEntity entity = new InventoryEntity(inventory.getSkuCode(), inventory.getQuantity());
-    entity.setId(inventory.getId() != null ? inventory.getId() : null);
+    InventoryEntity entity = new InventoryEntity.Builder(inventory.getId()).sku(inventory.getSku())
+        .location(inventory.getLocation())
+        .quantity(inventory.getQuantity()).type(inventory.getType().name()).active(inventory.isActive()).build();
     return entity;
   }
 
   public InventoryResponse inventoryToInventoryResponse(Inventory inventory) {
-    return new InventoryResponse(inventory.getSkuCode(), inventory.getQuantity());
+    return new InventoryResponse(inventory.getSku(), inventory.getQuantity());
   }
 
 }

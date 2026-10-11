@@ -1,9 +1,16 @@
 package dev.swang.ecommerce.inventoryservice.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException.NotImplemented;
+
 import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
+import dev.swang.ecommerce.inventoryservice.model.InventoryId;
+import dev.swang.ecommerce.inventoryservice.model.InventoryType;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryRepository;
 import dev.swang.ecommerce.utils.InventoryMapper;
@@ -13,7 +20,7 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final InventoryMapper inventoryMapper;
-    private static final String inventoryNotFoundStr = "Inventory not found for skuCode: ";
+    private static final String inventoryNotFoundStr = "Inventory not found for sku: ";
 
     public InventoryService(InventoryRepository inventoryRepository, InventoryMapper inventoryMapper) {
         this.inventoryRepository = inventoryRepository;
@@ -21,9 +28,79 @@ public class InventoryService {
     }
 
     @Transactional
-    public boolean ifExists(String skuCode) {
-        return inventoryRepository.findBySkuCode(skuCode).isPresent();
+    public Boolean ifExists(String sku, Integer location) {
+        return false;
     }
+
+    @Transactional
+    public Optional<Inventory> get(String sku, Integer location) {
+        return Optional.empty();
+    }
+
+    @Transactional
+    public Optional<List<Inventory>> get(String sku, Integer location, int offset, int limit) {
+        return Optional.empty();
+    }
+
+    @Transactional
+    public Inventory enable(String sku, Integer location) {
+        return null;
+    }
+
+    @Transactional
+    public Inventory disable(String sku, Integer location) {
+        return null;
+    }
+
+    /**
+     * Create a new inventory of the type, if the sku/location already exists, throw
+     * the exception.
+     * 
+     * @param sku
+     * @param location
+     * @param quantity
+     * @param type
+     * @return
+     */
+    @Transactional(readOnly = false)
+    public Inventory create(String sku, Integer location, Integer quantity, InventoryType type) {
+        return null;
+    }
+
+    /**
+     * Add the inventory of quantity to the existing one, throw exception if it
+     * doesn't exist.
+     * 
+     * @param sku
+     * @param location
+     * @param quantity
+     * @return
+     */
+    @Transactional(readOnly = false)
+    public Inventory enStock(String sku, Integer location, Integer quantity) {
+        return null;
+    }
+
+    /**
+     * Remove the inventory for location of sku, throw exception if it doesn't exist
+     * or there
+     * is not enough
+     * 
+     * @param sku
+     * @param location
+     * @param quantity
+     * @return
+     */
+    @Transactional(readOnly = false)
+    public Inventory outStock(String sku, Integer location, Integer quantity) {
+        return null;
+    }
+
+    @Transactional(readOnly = false)
+    public Inventory delete(String sku, Integer location) {
+        return null;
+    }
+    // todo: delete from here
 
     // we will check if the skuCode exists in the database, if it does, we will
     // update the quantity

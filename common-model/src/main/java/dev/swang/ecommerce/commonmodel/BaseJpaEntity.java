@@ -1,14 +1,15 @@
 package dev.swang.ecommerce.commonmodel;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
@@ -18,7 +19,6 @@ import jakarta.persistence.Version;
 public abstract class BaseJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -33,7 +33,12 @@ public abstract class BaseJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    protected BaseJpaEntity() {}
+    protected BaseJpaEntity() {
+    }
+
+    protected BaseJpaEntity(UUID id) {
+        this.id = Objects.requireNonNull(id);
+    }
 
     public UUID getId() {
         return id;
