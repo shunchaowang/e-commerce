@@ -3,15 +3,11 @@ package dev.swang.ecommerce.inventoryservice.model;
 import java.util.UUID;
 
 /**
- * This is the domain model we want to have managed mutability. What does
- * managed mutability mean?
- * Actually, when the object is created, it should be immutable. But we allow
- * some properties to be
- * changed in a manageable manner. Like an inventory, you want to change the
- * quantity and active, we don't want
- * to call that a setQuantity, but we would like to have something with a
- * meaningful name, like a
- * changeQuantity and toggleActive.
+ * This is the domain model we want to have managed mutability. What does managed mutability mean?
+ * Actually, when the object is created, it should be immutable. But we allow some properties to be
+ * changed in a manageable manner. Like an inventory, you want to change the quantity and active, we
+ * don't want to call that a setQuantity, but we would like to have something with a meaningful
+ * name, like a changeQuantity and toggleActive.
  */
 public class Inventory {
 
@@ -20,7 +16,6 @@ public class Inventory {
     private final Integer location;
     private final InventoryType type;
     private Integer quantity;
-    private Boolean active;
 
     private Inventory(Builder builder) {
         this.id = builder.id;
@@ -28,7 +23,6 @@ public class Inventory {
         this.location = builder.location;
         this.type = builder.type;
         this.quantity = builder.quantity;
-        this.active = builder.active;
     }
 
     public UUID getId() {
@@ -37,10 +31,6 @@ public class Inventory {
 
     public Integer getQuantity() {
         return quantity;
-    }
-
-    public Boolean isActive() {
-        return this.active;
     }
 
     public String getSku() {
@@ -67,7 +57,6 @@ public class Inventory {
         private String sku;
         private Integer location;
         private InventoryType type;
-        private Boolean active;
         private Integer quantity;
 
         public Builder id(UUID id) {
@@ -87,11 +76,6 @@ public class Inventory {
 
         public Builder type(InventoryType type) {
             this.type = type;
-            return this;
-        }
-
-        public Builder active(Boolean active) {
-            this.active = active;
             return this;
         }
 

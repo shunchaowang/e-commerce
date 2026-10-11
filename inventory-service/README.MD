@@ -11,9 +11,6 @@ The domain will have the attributes as below:
 - location: Integer
 - quantity: Integer
 - type: enum of store, DC or EFC
-- active: Boolean
-
-I'd like to have a composite key of sku/location pair to identify the model, essentially we want to have the inventory of the sku **a** at the location **x**.
 
 ## Model Mapper
 

@@ -2,14 +2,15 @@ package dev.swang.ecommerce.inventoryservice.service;
 
 import java.util.List;
 import java.util.Optional;
-
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpServerErrorException.NotImplemented;
-
+import org.springframework.util.StringUtils;
 import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
-import dev.swang.ecommerce.inventoryservice.model.InventoryId;
 import dev.swang.ecommerce.inventoryservice.model.InventoryType;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryRepository;
@@ -20,41 +21,88 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final InventoryMapper inventoryMapper;
-    private static final String inventoryNotFoundStr = "Inventory not found for sku: ";
 
-    public InventoryService(InventoryRepository inventoryRepository, InventoryMapper inventoryMapper) {
+    public InventoryService(InventoryRepository inventoryRepository,
+            InventoryMapper inventoryMapper) {
         this.inventoryRepository = inventoryRepository;
         this.inventoryMapper = inventoryMapper;
     }
 
     @Transactional
     public Boolean ifExists(String sku, Integer location) {
-        return false;
+        return inventoryRepository.findBySkuAndLocation(sku, location).isPresent();
     }
 
     @Transactional
     public Optional<Inventory> get(String sku, Integer location) {
-        return Optional.empty();
-    }
-
-    @Transactional
-    public Optional<List<Inventory>> get(String sku, Integer location, int offset, int limit) {
-        return Optional.empty();
-    }
-
-    @Transactional
-    public Inventory enable(String sku, Integer location) {
-        return null;
-    }
-
-    @Transactional
-    public Inventory disable(String sku, Integer location) {
-        return null;
+        return inventoryRepository.findBySkuAndLocation(sku, location)
+                .map(inventoryMapper::entityToInventory);
     }
 
     /**
-     * Create a new inventory of the type, if the sku/location already exists, throw
-     * the exception.
+     * Get a list of inventory for the given sku and location, with pagination.
+     * 
+     * @param sku
+     * @param location
+     * @param offset must be multiple of limit, otherwise will throw exception, must be 0, 10, 20,
+     *        30, etc. when limit is 10
+     * @param limit must be greater than 0, otherwise will throw exception
+     * @return
+     */
+    @Transactional
+    public List<Inventory> get(String sku, int offset, int limit) {
+
+        if (limit <= 0) {
+            throw new BadRequestException("Limit must be greater than 0");
+        }
+        if (offset < 0 || offset % limit != 0) {
+            throw new BadRequestException(
+                    "Offset must be a multiple of limit and greater than or equal to 0");
+        }
+
+        PageRequest pageable = PageRequest.of(offset / limit, limit);
+        Page<InventoryEntity> page =
+                StringUtils.hasText(sku) ? inventoryRepository.findBySku(sku, pageable)
+                        : inventoryRepository.findAll(pageable);
+
+        return page.getContent().stream().map(inventoryMapper::entityToInventory)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of inventory for the given sku and location, with pagination.
+     * 
+     * @param sku
+     * @param location
+     * @param offset must be multiple of limit, otherwise will throw exception, must be 0, 10, 20,
+     *        30, etc. when limit is 10
+     * @param limit must be greater than 0, otherwise will throw exception
+     * @return
+     */
+    @Transactional
+    public List<Inventory> get(Integer location, int offset, int limit) {
+
+        if (limit <= 0) {
+            throw new BadRequestException("Limit must be greater than 0");
+        }
+        if (offset < 0 || offset % limit != 0) {
+            throw new BadRequestException(
+                    "Offset must be a multiple of limit and greater than or equal to 0");
+        }
+
+        PageRequest pageable = PageRequest.of(offset / limit, limit);
+        Page<InventoryEntity> page =
+                location != null ? inventoryRepository.findByLocation(location, pageable)
+                        : inventoryRepository.findAll(pageable);
+
+        return page.getContent().stream().map(inventoryMapper::entityToInventory)
+                .collect(Collectors.toList());
+    }
+
+
+
+    /**
+     * Create a new inventory of the type, if the sku/location already exists, throw the exception.
      * 
      * @param sku
      * @param location
@@ -64,12 +112,17 @@ public class InventoryService {
      */
     @Transactional(readOnly = false)
     public Inventory create(String sku, Integer location, Integer quantity, InventoryType type) {
-        return null;
+        if (inventoryRepository.findBySkuAndLocation(sku, location).isPresent()) {
+            throw new BadRequestException(
+                    "Inventory already exists for sku: " + sku + " and location: " + location);
+        }
+        InventoryEntity entity = new InventoryEntity.Builder(UUID.randomUUID()).sku(sku)
+                .location(location).type(type.name()).build();
+        return inventoryMapper.entityToInventory(inventoryRepository.save(entity));
     }
 
     /**
-     * Add the inventory of quantity to the existing one, throw exception if it
-     * doesn't exist.
+     * Add the inventory of quantity to the existing one, throw exception if it doesn't exist.
      * 
      * @param sku
      * @param location
@@ -78,13 +131,19 @@ public class InventoryService {
      */
     @Transactional(readOnly = false)
     public Inventory enStock(String sku, Integer location, Integer quantity) {
-        return null;
+        if (!inventoryRepository.findBySkuAndLocation(sku, location).isPresent()) {
+            throw new BadRequestException(
+                    "Inventory does not exist for sku: " + sku + " and location: " + location);
+        }
+        InventoryEntity inventoryEntity =
+                inventoryRepository.findBySkuAndLocation(sku, location).get();
+        inventoryEntity.setQuantity(inventoryEntity.getQuantity() + quantity);
+        return inventoryMapper.entityToInventory(inventoryRepository.save(inventoryEntity));
     }
 
     /**
-     * Remove the inventory for location of sku, throw exception if it doesn't exist
-     * or there
-     * is not enough
+     * Remove the inventory for location of sku, throw exception if it doesn't exist or there is not
+     * enough
      * 
      * @param sku
      * @param location
@@ -93,49 +152,29 @@ public class InventoryService {
      */
     @Transactional(readOnly = false)
     public Inventory outStock(String sku, Integer location, Integer quantity) {
-        return null;
+        if (!inventoryRepository.findBySkuAndLocation(sku, location).isPresent()) {
+            throw new BadRequestException(
+                    "Inventory does not exist for sku: " + sku + " and location: " + location);
+        }
+        InventoryEntity inventoryEntity =
+                inventoryRepository.findBySkuAndLocation(sku, location).get();
+        if (inventoryEntity.getQuantity() < quantity) {
+            throw new BadRequestException(
+                    "Not enough inventory for sku: " + sku + " and location: " + location);
+        }
+        inventoryEntity.setQuantity(inventoryEntity.getQuantity() - quantity);
+        return inventoryMapper.entityToInventory(inventoryRepository.save(inventoryEntity));
     }
 
     @Transactional(readOnly = false)
     public Inventory delete(String sku, Integer location) {
-        return null;
-    }
-    // todo: delete from here
-
-    // we will check if the skuCode exists in the database, if it does, we will
-    // update the quantity
-    // by adding the passed in quantity,
-    // if it does not exist, we will create a new inventory with the passed in
-    // skuCode and quantity
-    @Transactional
-    public Inventory enStock(String skuCode, int quantity) {
-
-        InventoryEntity inventoryEntity = inventoryRepository.findBySkuCode(skuCode)
-                .orElseGet(() -> new InventoryEntity(skuCode, 0));
-        // now inventoryEntity either an existing inventory or a new one with quantity 0
-        // conver it to the Inventory
-        Inventory inventory = inventoryMapper.entityToInventory(inventoryEntity);
-        inventory.changeQuantity(inventory.getQuantity() + quantity);
-        inventoryEntity.setQuantity(inventory.getQuantity());
-        return inventory;
-    }
-
-    @Transactional
-    public Inventory outStock(String skuCode, int quantity) {
-        InventoryEntity inventoryEntity = inventoryRepository.findBySkuCode(skuCode)
-                .orElseThrow(() -> new BadRequestException(inventoryNotFoundStr + skuCode));
-        Inventory inventory = inventoryMapper.entityToInventory(inventoryEntity);
-        if (inventory.getQuantity() < quantity) {
-            throw new BadRequestException("Not enough inventory for skuCode: " + skuCode);
+        if (!inventoryRepository.findBySkuAndLocation(sku, location).isPresent()) {
+            throw new BadRequestException(
+                    "Inventory does not exist for sku: " + sku + " and location: " + location);
         }
-        inventory.changeQuantity(inventory.getQuantity() - quantity);
-        inventoryEntity.setQuantity(inventory.getQuantity());
-        return inventory;
-    }
-
-    @Transactional(readOnly = true)
-    public Integer getStock(String skuCode) {
-        return inventoryRepository.findBySkuCode(skuCode).map(InventoryEntity::getQuantity)
-                .orElseThrow(() -> new BadRequestException(inventoryNotFoundStr + skuCode));
+        InventoryEntity inventoryEntity =
+                inventoryRepository.findBySkuAndLocation(sku, location).get();
+        inventoryRepository.delete(inventoryEntity);
+        return inventoryMapper.entityToInventory(inventoryEntity);
     }
 }

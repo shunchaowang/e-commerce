@@ -8,8 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 /**
- * Extends BaseJpaEntity with the UUID, version, createdAt and updatedAt
- * InventoryEntity
+ * Extends BaseJpaEntity with the UUID, version, createdAt and updatedAt InventoryEntity
  */
 @Entity
 @Table(name = "inventory")
@@ -19,10 +18,8 @@ public class InventoryEntity extends BaseJpaEntity {
     private String sku;
     private Integer quantity;
     private String type;
-    private Boolean active;
 
-    protected InventoryEntity() {
-    }
+    protected InventoryEntity() {}
 
     private InventoryEntity(Builder builder) {
         super(builder.id);
@@ -30,7 +27,6 @@ public class InventoryEntity extends BaseJpaEntity {
         this.location = builder.location;
         this.quantity = builder.quantity;
         this.type = builder.type;
-        this.active = builder.active;
     }
 
     public String getSku() {
@@ -61,16 +57,8 @@ public class InventoryEntity extends BaseJpaEntity {
         this.type = type;
     }
 
-    public Boolean getActive() {
-        return active;
-    }
-
     public void setLocation(Integer location) {
         this.location = location;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 
     public static class Builder {
@@ -80,7 +68,6 @@ public class InventoryEntity extends BaseJpaEntity {
         private Integer location;
         private Integer quantity;
         private String type;
-        private Boolean active;
 
         public Builder(UUID id) {
             this.id = Objects.requireNonNull(id);
@@ -103,11 +90,6 @@ public class InventoryEntity extends BaseJpaEntity {
 
         public Builder type(String type) {
             this.type = type;
-            return this;
-        }
-
-        public Builder active(Boolean active) {
-            this.active = active;
             return this;
         }
 
