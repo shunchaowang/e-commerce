@@ -1,6 +1,8 @@
 package dev.swang.ecommerce.inventoryservice.api;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +21,31 @@ import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.service.InventoryService;
 import dev.swang.ecommerce.utils.InventoryMapper;
 
+/**
+ * 
+ * InventoryController
+ * In this REST controller, we should have the method as the following.
+ * The first one, we should be able to get the location inventory of the SKU.
+ * That
+ * means we pass in a SKU and a specific location. We should be able to get the
+ * inventory for that location with SKU.
+ * The second one, we should be able to get a pageable inventory for a specific
+ * SKU.
+ * The third one, we should be able to get the inventory for the specific
+ * location.
+ * The fourth one, we should be able to get all the inventory. Definitely it
+ * needs to be pageable.
+ * The fifth one, we should be able to create a new SKU inventory for the
+ * location.
+ * The sixth one, we should be able to in-stock some quantity for the specific
+ * location with a specific SKU.
+ * The seventh one, we need to be able to out-stock a SKU from an inventory on
+ * the location.
+ * Do we need to delete? Yes,
+ * we should be able to delete a SKU and the location combination.
+ */
 @RestController
-@RequestMapping("/api/v1/inventory/{skuCode}")
+@RequestMapping("/api/v1/inventory")
 public class InventoryController {
 
   // visibility-scope-mutability
@@ -32,6 +57,36 @@ public class InventoryController {
     this.inventoryService = inventoryService;
     this.inventoryMapper = inventoryMapper;
   }
+
+  @GetMapping("/{sku}/{location}")
+  public ResponseEntity<InventoryResponse> getInventoryBySkuAndLocation(@PathVariable String sku,
+      @PathVariable Integer location) {
+    Optional<Inventory> inventory = inventoryService.get(sku, location);
+    if (inventory.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    InventoryResponse response = inventoryMapper.inventoryToInventoryResponse(inventory.get());
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{sku}")
+  public ResponseEntity<List<InventoryResponse>> getInventoryBySku(@PathVariable String sku, @RequestParam int offset,
+      @RequestParam int limit) {
+    List<InventoryResponse> response = inventoryService.get(sku, offset, limit)
+        .stream().map(inventoryMapper::inventoryToInventoryResponse).toList();
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{location}")
+  public ResponseEntity<List<InventoryResponse>> getInventoryByLocation(@PathVariable String location,
+      @RequestParam int offset,
+      @RequestParam int limit) {
+    List<InventoryResponse> response = inventoryService.get(location, offset, limit)
+        .stream().map(inventoryMapper::inventoryToInventoryResponse).toList();
+    return ResponseEntity.ok(response);
+  }
+
+  // todo: delete here
 
   @GetMapping
   public ResponseEntity<InventoryResponse> getStock(@PathVariable String skuCode) {

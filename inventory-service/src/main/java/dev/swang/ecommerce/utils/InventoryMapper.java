@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import dev.swang.ecommerce.inventoryservice.api.InventoryResponse;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
+import dev.swang.ecommerce.inventoryservice.model.InventoryType;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
 
 @Component
@@ -11,7 +12,8 @@ public class InventoryMapper {
 
   public Inventory entityToInventory(InventoryEntity entity) {
     return new Inventory.Builder().id(entity.getId()).sku(entity.getSku())
-        .location(entity.getLocation()).quantity(entity.getQuantity()).build();
+        .location(entity.getLocation()).type(InventoryType.valueOf(entity.getType()))
+        .quantity(entity.getQuantity()).build();
   }
 
   public InventoryEntity inventoryToEntity(Inventory inventory) {

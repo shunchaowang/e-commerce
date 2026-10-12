@@ -85,7 +85,7 @@ public class InventoryEntity extends BaseJpaEntity {
 
         public Builder quantity(Integer quantity) {
             this.quantity = quantity;
-            return null;
+            return this;
         }
 
         public Builder type(String type) {
