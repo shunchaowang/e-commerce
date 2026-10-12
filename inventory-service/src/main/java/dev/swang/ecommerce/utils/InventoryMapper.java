@@ -21,7 +21,8 @@ public class InventoryMapper {
   }
 
   public InventoryResponse inventoryToInventoryResponse(Inventory inventory) {
-    return new InventoryResponse(inventory.getSku(), inventory.getQuantity());
+    return new InventoryResponse(inventory.getSku(), inventory.getLocation(), inventory.getType().name(),
+        inventory.getQuantity());
   }
 
 }
