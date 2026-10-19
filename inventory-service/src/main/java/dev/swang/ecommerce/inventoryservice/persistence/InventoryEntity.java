@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import dev.swang.ecommerce.commonmodel.BaseJpaEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -14,9 +15,13 @@ import jakarta.persistence.Table;
 @Table(name = "inventory")
 public class InventoryEntity extends BaseJpaEntity {
 
+    @Column(name = "location", nullable = false)
     private Integer location;
+    @Column(name = "sku", nullable = false)
     private String sku;
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
+    @Column(name = "type", nullable = false)
     private String type;
 
     protected InventoryEntity() {}

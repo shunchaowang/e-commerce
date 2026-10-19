@@ -13,9 +13,9 @@ public class Inventory {
 
     private final UUID id;
     private final String sku;
-    private final Integer location;
+    private final int location;
     private final InventoryType type;
-    private Integer quantity;
+    private int quantity;
 
     private Inventory(Builder builder) {
         this.id = builder.id;
@@ -29,7 +29,7 @@ public class Inventory {
         return id;
     }
 
-    public Integer getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
@@ -37,7 +37,7 @@ public class Inventory {
         return sku;
     }
 
-    public Integer getLocation() {
+    public int getLocation() {
         return location;
     }
 
@@ -45,7 +45,7 @@ public class Inventory {
         return type;
     }
 
-    public void changeQuantity(Integer quantity) {
+    public void changeQuantity(int quantity) {
         if (quantity < 0) {
             throw new IllegalArgumentException("Quantity cannot be negative");
         }
@@ -55,9 +55,9 @@ public class Inventory {
     public static class Builder {
         private UUID id;
         private String sku;
-        private Integer location;
+        private int location;
         private InventoryType type;
-        private Integer quantity;
+        private int quantity;
 
         public Builder id(UUID id) {
             this.id = id;
@@ -69,7 +69,7 @@ public class Inventory {
             return this;
         }
 
-        public Builder location(Integer location) {
+        public Builder location(int location) {
             this.location = location;
             return this;
         }
@@ -79,7 +79,7 @@ public class Inventory {
             return this;
         }
 
-        public Builder quantity(Integer quantity) {
+        public Builder quantity(int quantity) {
             this.quantity = quantity;
             return this;
         }

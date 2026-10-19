@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -17,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
+import dev.swang.ecommerce.inventoryservice.model.InventoryType;
 import dev.swang.ecommerce.inventoryservice.service.InventoryService;
 import dev.swang.ecommerce.utils.InventoryMapper;
 
@@ -31,22 +33,73 @@ class InventoryControllerTest {
         private InventoryService inventoryService;
 
         @Test
-        void getStock_WhenInventoryExists_ThenReturnQuantity() throws Exception {
-                String skuCode = "SKU123";
+        void getInventory_WhenInventoryExists_GivenSkuAndLocation_ThenReturnInventory() throws Exception {
+                String sku = "SKU123";
+                int location = 899;
                 int quantity = 10;
 
-                when(inventoryService.getStock(skuCode)).thenReturn(quantity);
+                when(inventoryService.get(sku, location)).thenReturn(Optional.of(new Inventory.Builder().sku(sku).location(location).quantity(quantity).build()));
 
-                mockMvc.perform(get("/api/v1/inventory/" + skuCode)).andExpect(status().isOk())
-                                .andExpect(jsonPath("$.skuCode").value(skuCode))
+                mockMvc.perform(get("/api/v1/inventory/" + sku + "/" + location)).andExpect(status().isOk())
+                                .andExpect(jsonPath("$.sku").value(sku))
+                                .andExpect(jsonPath("$.location").value(location))
                                 .andExpect(jsonPath("$.quantity").value(quantity));
 
-                verify(inventoryService).getStock(skuCode);
+                verify(inventoryService).get(sku, location);
         }
 
         @Test
-        void getStock_WhenInventoryNotExists_ThenReturnNotFound() throws Exception {
-                String skuCode = "SKU123";
+        void getInventory_WhenInventoryNotExists_GivenSkuAndLocation_ThenReturnNotFound() throws Exception {
+                String sku = "SKU123";
+                int location = 899;
+
+                when(inventoryService.get(sku, location)).thenReturn(Optional.empty());
+
+                mockMvc.perform(get("/api/v1/inventory/" + sku + "/" + location)).andExpect(status().isNotFound());
+
+                verify(inventoryService).get(sku, location);
+        }
+
+        @Test 
+        void createInventory_WhenNotExisted_GivenValidRequest_ThenReturnCreated() throws Exception {
+                String sku = "SKU123";
+                int location = 899;
+                int quantity = 10;
+                String type = "STORE";
+
+                Inventory inventory = new Inventory.Builder().sku(sku).location(location).quantity(quantity).type(InventoryType.valueOf(type)).build();
+
+                when(inventoryService.create(inventory)).thenReturn(inventory);
+
+                mockMvc.perform(post("/api/v1/inventory")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"sku\":\"" + sku + "\", \"location\":" + location + ", \"quantity\":" + quantity + ", \"type\":\"" + type + "\"}"))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.sku").value(sku))
+                                .andExpect(jsonPath("$.location").value(location))
+                                .andExpect(jsonPath("$.quantity").value(quantity));
+        }
+
+        @Test
+        void enStock_WhenValidRequiredAndInventoryNotExists_ThenReturnNotFound() throws Exception {
+                String sku = "SKU123";
+                int quantity = 10;
+
+                when(inventoryService.ifExists(sku, location)).thenReturn(false);
+
+                mockMvc.perform(post("/api/v1/inventory/" + sku + "?valid=true")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"quantity\":" + quantity + "}"))
+                                .andExpect(status().isNotFound());
+
+                verify(inventoryService).ifExists(sku);
+                verify(inventoryService, never()).enStock(sku, quantity);
+        }
+
+        @Test
+        void enStock_WhenValidRequiredAndInventoryExists_ThenReturnCreated() throws Exception {
+                String sku = "SKU123";
+                int quantity = 10;
 
                 when(inventoryService.getStock(skuCode))
                                 .thenThrow(new BadRequestException("Inventory not found"));

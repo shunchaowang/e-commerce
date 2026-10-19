@@ -1,48 +1,37 @@
 package dev.swang.ecommerce.inventoryservice.api;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import dev.swang.ecommerce.inventoryservice.config.BadRequestException;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.service.InventoryService;
 import dev.swang.ecommerce.utils.InventoryMapper;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 /**
  * 
- * InventoryController
- * In this REST controller, we should have the method as the following.
- * The first one, we should be able to get the location inventory of the SKU.
- * That
- * means we pass in a SKU and a specific location. We should be able to get the
- * inventory for that location with SKU.
- * The second one, we should be able to get a pageable inventory for a specific
- * SKU.
- * The third one, we should be able to get the inventory for the specific
- * location.
- * The fourth one, we should be able to get all the inventory. Definitely it
- * needs to be pageable.
- * The fifth one, we should be able to create a new SKU inventory for the
- * location.
- * The sixth one, we should be able to in-stock some quantity for the specific
- * location with a specific SKU.
- * The seventh one, we need to be able to out-stock a SKU from an inventory on
- * the location.
- * Do we need to delete? Yes,
- * we should be able to delete a SKU and the location combination.
+ * InventoryController In this REST controller, we should have the method as the following. The
+ * first one, we should be able to get the location inventory of the SKU. That means we pass in a
+ * SKU and a specific location. We should be able to get the inventory for that location with SKU.
+ * The second one, we should be able to get a pageable inventory for a specific SKU. The third one,
+ * we should be able to get the inventory for the specific location. The fourth one, we should be
+ * able to get all the inventory. Definitely it needs to be pageable. The fifth one, we should be
+ * able to create a new SKU inventory for the location. The sixth one, we should be able to in-stock
+ * some quantity for the specific location with a specific SKU. The seventh one, we need to be able
+ * to out-stock a SKU from an inventory on the location. Do we need to delete? Yes, we should be
+ * able to delete a SKU and the location combination.
  */
 @RestController
 @RequestMapping("/api/v1/inventory")
@@ -69,94 +58,61 @@ public class InventoryController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/{sku}")
-  public ResponseEntity<List<InventoryResponse>> getInventoryBySku(@PathVariable String sku, @RequestParam int offset,
-      @RequestParam int limit) {
-    List<InventoryResponse> response = inventoryService.get(sku, offset, limit)
-        .stream().map(inventoryMapper::inventoryToInventoryResponse).toList();
-    return ResponseEntity.ok(response);
-  }
-
-  @GetMapping("/{location}")
-  public ResponseEntity<List<InventoryResponse>> getInventoryByLocation(@PathVariable String location,
-      @RequestParam int offset,
-      @RequestParam int limit) {
-    List<InventoryResponse> response = inventoryService.get(location, offset, limit)
-        .stream().map(inventoryMapper::inventoryToInventoryResponse).toList();
-    return ResponseEntity.ok(response);
-  }
-
-  // todo: delete here
-
   @GetMapping
-  public ResponseEntity<InventoryResponse> getStock(@PathVariable String skuCode) {
-    try {
-      Integer quantity = inventoryService.getStock(skuCode);
-      return ResponseEntity.ok(new InventoryResponse(skuCode, quantity));
-    } catch (BadRequestException e) {
-      logger.error("Error getting stock for skuCode: {}", skuCode, e);
-      return ResponseEntity.notFound().build();
-    }
+  public ResponseEntity<List<InventoryResponse>> getAllInventory(@RequestParam int offset,
+      @RequestParam int limit) {
+    List<InventoryResponse> response = inventoryService.getAll(offset, limit).stream()
+        .map(inventoryMapper::inventoryToInventoryResponse).toList();
+    return ResponseEntity.ok(response);
   }
 
-  /**
-   * Adds stock to the inventory for the given SKU code. This is to show how to
-   * path variable,
-   * request param and request body in the same method. path variable is used to
-   * identify the
-   * resource, request param is used to pass additional information like filter,
-   * and request body is
-   * used to pass the data. post /api/v1/inventory/{skuCode}?valid=true
-   * {"quantity": 10 }. This api
-   * is used to add stock to the inventory for the given SKU code.
-   * 
-   * @param skuCode which sku to want to add ventory
-   * @param valid   should validate if the sku exists or not. if valid is true, we
-   *                will check if the
-   *                sku exists in the database, if it does not exist, we will
-   *                throw an exception; if valid
-   *                is false, we will not check if the sku exists in the database,
-   *                we will just add the
-   *                stock to the inventory if the sku does not exist, we will
-   *                create a new inventory with
-   *                the given sku and quantity.
-   * @param request the request body containing the quantity to add to the
-   *                inventory, to make this
-   *                generic, we can use the same request body for both enStock and
-   *                outStock methods.
-   * @return
-   */
   @PostMapping
-  public ResponseEntity<InventoryResponse> enStock(@PathVariable String skuCode,
-      @RequestParam boolean valid, @RequestBody CommandInventoryRequest request) {
-    if (valid) {
-      // check if the sku exists in the database, if it does not exist, it's a bad
-      // request, we will
-      // throw an exception
-      if (!inventoryService.ifExists(skuCode)) {
-        return ResponseEntity.notFound().build();
-      } else {
-        Inventory inventory = inventoryService.enStock(skuCode, request.quantity());
-        return ResponseEntity
-            .created(URI.create("/api/v1/inventory/" + inventory.getSkuCode()))
-            .body(inventoryMapper.inventoryToInventoryResponse(inventory));
-      }
-    } else {
-      Inventory inventory = inventoryService.enStock(skuCode, request.quantity());
-      return ResponseEntity
-          .created(URI.create("/api/v1/inventory/" + skuCode))
-          .body(inventoryMapper.inventoryToInventoryResponse(inventory));
-    }
+  public ResponseEntity<InventoryResponse> createInventory(
+      @RequestBody CreateInventoryRequest request) {
+
+    Inventory inventory = inventoryMapper.createInventoryRequestToInventory(request);
+    inventory = inventoryService.create(inventory);
+    logger.info("Created inventory for sku: {} and location: {}", request.sku(),
+        request.location());
+    return ResponseEntity.ok(inventoryMapper.inventoryToInventoryResponse(inventory));
   }
 
   @PutMapping
-  public ResponseEntity<InventoryResponse> outStock(@PathVariable String skuCode,
-      @RequestBody CommandInventoryRequest request) {
-    // Assuming there's a method in inventoryService to handle outStock with just
-    // quantity
-    Inventory inventory = inventoryService.outStock(skuCode, request.quantity());
-    return ResponseEntity
-        .ok(inventoryMapper.inventoryToInventoryResponse(inventory));
+  public ResponseEntity<InventoryResponse> updateInventoryType(
+      @RequestBody UpdateInventoryTypeRequest request) {
+    Inventory inventory = inventoryMapper.updateInventoryTypeRequestToInventory(request);
+    inventory = inventoryService.update(inventory);
+    logger.info("Updated inventory type for sku: {} and location: {}", request.sku(),
+        request.location());
+    return ResponseEntity.ok(inventoryMapper.inventoryToInventoryResponse(inventory));
+  }
+
+  @PatchMapping
+  public ResponseEntity<InventoryResponse> enStock(@RequestBody EnOutStockRequest request) {
+    Inventory inventory = inventoryMapper.enOutStockRequestToInventory(request);
+    inventory.changeQuantity(inventory.getQuantity() + request.quantity());
+    inventory = inventoryService.update(inventory);
+    logger.info("In-stocked {} units of SKU {} at location {}", request.quantity(), request.sku(),
+        request.location());
+    return ResponseEntity.ok(inventoryMapper.inventoryToInventoryResponse(inventory));
+  }
+
+  @PatchMapping
+  public ResponseEntity<InventoryResponse> outStock(@RequestBody EnOutStockRequest request) {
+    Inventory inventory = inventoryMapper.enOutStockRequestToInventory(request);
+    inventory.changeQuantity(inventory.getQuantity() - request.quantity());
+    inventory = inventoryService.update(inventory);
+    logger.info("Out-stocked {} units of SKU {} from location {}", request.quantity(),
+        request.sku(), request.location());
+    return ResponseEntity.ok(inventoryMapper.inventoryToInventoryResponse(inventory));
+  }
+
+  @DeleteMapping("/{sku}/{location}")
+  public ResponseEntity<InventoryResponse> deleteInventory(@PathVariable String sku,
+      @PathVariable Integer location) {
+    inventoryService.delete(sku, location);
+    logger.info("Deleted inventory for sku: {} and location: {}", sku, location);
+    return ResponseEntity.noContent().build();
   }
 
 }

@@ -3,6 +3,8 @@ package dev.swang.ecommerce.inventoryservice.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import dev.swang.ecommerce.inventoryservice.model.Inventory;
 import dev.swang.ecommerce.inventoryservice.model.InventoryType;
 import dev.swang.ecommerce.inventoryservice.persistence.InventoryEntity;
@@ -75,7 +79,7 @@ class InventoryServiceTest {
   }
 
   @Test
-  void get_WhenInventoryExists_ThenReturnEmpty() {
+  void get_WhenInventoryNotExists_ThenReturnEmpty() {
     String sku = "SKU123";
     Integer location = 899;
     when(inventoryRepository.findBySkuAndLocation(sku, location)).thenReturn(Optional.empty());
@@ -84,6 +88,43 @@ class InventoryServiceTest {
 
     assertThat(result).isNotPresent();
   }
+
+  @Test
+  void getAll_WhenInventoryExists_GivenNoPagination_ThenReturnInventoryList() {
+    String sku = "SKU123";
+    Integer location = 899;
+    UUID id = UUID.randomUUID();
+    InventoryEntity inventoryEntity = new InventoryEntity.Builder(id).sku(sku).location(location)
+        .type(InventoryType.STORE.name()).quantity(10).build();
+    when(inventoryRepository.findAll()).thenReturn(java.util.List.of(inventoryEntity));
+
+    java.util.List<Inventory> result = inventoryService.getAll(-1, -1);
+
+    assertThat(result).isNotEmpty();
+    assertThat(result.get(0).getSku()).isEqualTo(sku);
+    assertThat(result.get(0).getLocation()).isEqualTo(location);
+  }
+
+  @Test
+  void getAll_WhenInventoryExists_GivenPagination_ThenReturnInventoryList() {
+    List<InventoryEntity> inventoryEntities = new ArrayList<>();
+    for (int i = 0; i < 11; i++) {
+      String sku = "SKU" + i;
+      Integer location = 899 + i;
+      UUID id = UUID.randomUUID();
+      InventoryEntity inventoryEntity = new InventoryEntity.Builder(id).sku(sku).location(location)
+          .type(InventoryType.STORE.name()).quantity(10).build();
+      inventoryEntities.add(inventoryEntity);
+    }
+    when(inventoryRepository.findAll(PageRequest.of(0, 10)))
+        .thenReturn(new PageImpl<>(inventoryEntities));
+
+    List<Inventory> result = inventoryService.getAll(0, 10);
+
+    assertThat(result).hasSize(10);
+  }
+
+
 
   @Test
   void create_WhenInventoryNotExists_ThenReturnInventory() {
@@ -96,7 +137,7 @@ class InventoryServiceTest {
     when(inventoryRepository.findBySkuAndLocation(sku, location)).thenReturn(Optional.empty());
     when(inventoryRepository.save(inventoryEntity)).thenReturn(inventoryEntity);
 
-    Inventory result = inventoryService.create(sku, location, quantity, type);
+    Inventory result = inventoryService.create(inventoryMapper.entityToInventory(inventoryEntity));
 
     assertThat(result).isNotNull();
     assertThat(result.getSku()).isEqualTo(sku);
@@ -114,24 +155,25 @@ class InventoryServiceTest {
     when(inventoryRepository.findBySkuAndLocation(sku, location))
         .thenReturn(Optional.of(inventoryEntity));
 
-    assertThrows(RuntimeException.class,
-        () -> inventoryService.create(sku, location, quantity, type),
+    Inventory inventory = inventoryMapper.entityToInventory(inventoryEntity);
+    assertThrows(RuntimeException.class, () -> inventoryService.create(inventory),
         "Inventory already exists for sku: " + sku + " and location: " + location);
   }
 
   @Test
-  void enStock_WhenInventoryNotExists_ThenThrowException() {
+  void update_WhenInventoryNotExists_ThenThrowException() {
     String sku = "SKU123";
     Integer location = 899;
     int quantity = 10;
     when(inventoryRepository.findBySkuAndLocation(sku, location)).thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> inventoryService.enStock(sku, location, quantity),
+    Inventory inventory = new Inventory.Builder().sku(sku).location(location).quantity(quantity).build();
+    assertThrows(RuntimeException.class, () -> inventoryService.update(inventory),
         "Inventory does not exist for sku: " + sku + " and location: " + location);
   }
 
   @Test
-  void enStock_WhenInventoryExists_ThenReturnInventory() {
+  void update_WhenInventoryExists_ThenReturnInventory() {
     String sku = "SKU123";
     Integer location = 899;
     int quantity = 10;
@@ -140,51 +182,10 @@ class InventoryServiceTest {
     when(inventoryRepository.findBySkuAndLocation(sku, location))
         .thenReturn(Optional.of(inventoryEntity));
 
-    Inventory result = inventoryService.enStock(sku, location, quantity);
+    Inventory result = inventoryService.update(inventoryMapper.entityToInventory(inventoryEntity));
 
     assertThat(result).isNotNull();
-    assertThat(result.getQuantity()).isEqualTo(quantity + quantity);
-  }
-
-  @Test
-  void outStock_WhenInventoryNotExists_ThenThrowException() {
-    String sku = "SKU123";
-    Integer location = 899;
-    int quantity = 10;
-    when(inventoryRepository.findBySkuAndLocation(sku, location)).thenReturn(Optional.empty());
-
-    assertThrows(RuntimeException.class, () -> inventoryService.outStock(sku, location, quantity),
-        "Inventory does not exist for sku: " + sku + " and location: " + location);
-  }
-
-  @Test
-  void outStock_WhenInventoryExistsButNotEnough_ThenThrowException() {
-    String sku = "SKU123";
-    Integer location = 899;
-    int quantity = 10;
-    InventoryEntity inventoryEntity = new InventoryEntity.Builder(UUID.randomUUID()).sku(sku)
-        .location(location).type(InventoryType.STORE.name()).quantity(5).build();
-    when(inventoryRepository.findBySkuAndLocation(sku, location))
-        .thenReturn(Optional.of(inventoryEntity));
-
-    assertThrows(RuntimeException.class, () -> inventoryService.outStock(sku, location, quantity),
-        "Not enough inventory for sku: " + sku + " and location: " + location);
-  }
-
-  @Test
-  void outStock_WhenInventoryExistsAndEnough_ThenReturnInventory() {
-    String sku = "SKU123";
-    Integer location = 899;
-    int quantity = 10;
-    InventoryEntity inventoryEntity = new InventoryEntity.Builder(UUID.randomUUID()).sku(sku)
-        .location(location).type(InventoryType.STORE.name()).quantity(15).build();
-    when(inventoryRepository.findBySkuAndLocation(sku, location))
-        .thenReturn(Optional.of(inventoryEntity));
-
-    Inventory result = inventoryService.outStock(sku, location, quantity);
-
-    assertThat(result).isNotNull();
-    assertThat(result.getQuantity()).isEqualTo(5);
+    assertThat(result.getQuantity()).isEqualTo(quantity);
   }
 
   @Test
